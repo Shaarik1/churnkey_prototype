@@ -1,86 +1,158 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Subscription Settings</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Subscription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 1. simple CSS to make it look nice */
-        body { font-family: sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; padding-top: 50px; }
-        .card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 400px; }
-        h2 { margin-top: 0; }
-        .plan-info { background: #eef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        
-        /* The "Danger Zone" Button */
-        .btn-cancel { background: #ff4d4d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
-        .btn-cancel:hover { background: #cc0000; }
-
-        /* THE POPUP (Hidden by default) */
-        #retention-modal {
-            display: none; /* Hidden! */
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center; justify-content: center;
-        }
-        .modal-content { background: white; padding: 30px; border-radius: 10px; text-align: center; width: 300px; }
-        .btn-accept { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; }
-        .btn-close { background: #ccc; border: none; padding: 5px 10px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+        /* Smooth transitions for the modal */
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 h-screen flex items-center justify-center font-sans">
 
-    <div class="card">
-        <h2>Manage Subscription</h2>
-        <div class="plan-info">
-            <strong>Current Plan:</strong> Pro Monthly<br>
-            <strong>Price:</strong> $100.00 / month
+    <div id="main-app" class="text-center">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md mx-auto">
+            <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Manage Subscription</h2>
+            <p class="text-gray-500 mb-6">Current Plan: <strong>Pro ($100/mo)</strong></p>
+            <button onclick="startCancellation()" class="text-red-500 hover:text-red-700 font-medium text-sm hover:underline">
+                Cancel Subscription
+            </button>
         </div>
-        <button class="btn-cancel" onclick="showRetentionOffer()">Cancel Subscription</button>
     </div>
 
-    <div id="retention-modal">
-        <div class="modal-content">
-            <h2>Wait! Don't go.</h2>
-            <p>We'll give you <strong>50% OFF</strong> your next month if you stay.</p>
+    <div id="churn-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden fade-in">
             
-            <button class="btn-accept" onclick="acceptOffer()">🎁 Accept 50% Off</button>
-            
-            <br>
-            <button class="btn-close" onclick="closeModal()">No thanks, really cancel</button>
+            <div id="step-survey" class="p-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">We're sorry to see you go</h3>
+                <p class="text-gray-500 mb-6">To help us improve, could you tell us why you are leaving?</p>
+                
+                <div class="space-y-3">
+                    <button onclick="handleSurvey('expensive')" class="w-full text-left p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition group">
+                        <span class="font-medium text-gray-700 group-hover:text-blue-700">It's too expensive</span>
+                    </button>
+                    <button onclick="handleSurvey('technical')" class="w-full text-left p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition group">
+                        <span class="font-medium text-gray-700 group-hover:text-blue-700">I'm having technical issues</span>
+                    </button>
+                    <button onclick="handleSurvey('other')" class="w-full text-left p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition group">
+                        <span class="font-medium text-gray-700 group-hover:text-blue-700">I found a better alternative</span>
+                    </button>
+                </div>
+                
+                <button onclick="closeModal()" class="mt-6 text-gray-400 text-sm hover:text-gray-600">Nevermind, keep my account</button>
+            </div>
+
+            <div id="step-offer" class="hidden p-8 bg-blue-50 text-center">
+                <div class="bg-white p-2 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <span class="text-2xl">🎁</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2" id="offer-title">Wait! Before you go...</h3>
+                <p class="text-gray-600 mb-6" id="offer-text">We'd hate to lose you. Here is a special offer.</p>
+                
+                <div class="bg-white border-2 border-blue-100 rounded-xl p-6 mb-6">
+                    <p class="text-sm text-blue-600 font-bold uppercase tracking-wide mb-1">Exclusive Offer</p>
+                    <p class="text-3xl font-extrabold text-gray-900" id="offer-value">50% OFF</p>
+                    <p class="text-gray-500 text-sm mt-1">For the next 3 months</p>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button onclick="acceptOffer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
+                        Accept Offer
+                    </button>
+                    <button onclick="finalCancel()" class="w-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition">
+                        No thanks, proceed to cancel
+                    </button>
+                </div>
+            </div>
+
+            <div id="step-success" class="hidden p-8 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl">✓</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Discount Applied!</h3>
+                <p class="text-gray-500 mb-6">Your subscription has been updated. You saved $50.00.</p>
+                <button onclick="closeModal()" class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-lg">Return to Dashboard</button>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // 1. Show the popup when they click Cancel
-        function showRetentionOffer() {
-            document.getElementById('retention-modal').style.display = 'flex';
+        // Generate a random ID for this session
+        const customerId = 'user_' + Math.floor(Math.random() * 1000);
+        let currentOfferType = "";
+
+        function startCancellation() {
+            document.getElementById('churn-modal').classList.remove('hidden');
         }
 
-        // 2. Hide the popup
         function closeModal() {
-            document.getElementById('retention-modal').style.display = 'none';
-            alert("Okay, sending you to the cancellation page...");
+            document.getElementById('churn-modal').classList.add('hidden');
+            // Reset views
+            document.getElementById('step-survey').classList.remove('hidden');
+            document.getElementById('step-offer').classList.add('hidden');
+            document.getElementById('step-success').classList.add('hidden');
         }
 
-        // 3. TALK TO YOUR PYTHON BACKEND
-        async function acceptOffer() {
-            const customerId = "user_" + Math.floor(Math.random() * 1000); // Random User ID
-            
-            // We use 'fetch' to send a POST request to your running server
-            // Note: We are using URL parameters just like in Swagger
-            const url = `/accept-offer?customer_id=${customerId}&offer_type=50_percent_off`;
+        function handleSurvey(reason) {
+            // HIDE SURVEY, SHOW OFFER
+            document.getElementById('step-survey').classList.add('hidden');
+            document.getElementById('step-offer').classList.remove('hidden');
 
-            try {
-                const response = await fetch(url, { method: 'POST' });
-                const data = await response.json();
+            // DYNAMIC LOGIC: Change the offer based on the reason
+            const title = document.getElementById('offer-title');
+            const text = document.getElementById('offer-text');
+            const value = document.getElementById('offer-value');
 
-                if (data.status === "success") {
-                    alert("Success! " + data.message + "\n(Check your Python terminal!)");
-                    document.getElementById('retention-modal').style.display = 'none';
-                }
-            } catch (error) {
-                alert("Error connecting to backend! Is your Python server running?");
+            if (reason === 'expensive') {
+                title.innerText = "Is price the only issue?";
+                text.innerText = "We can help with that. Claim this discount to stay.";
+                value.innerText = "50% OFF";
+                currentOfferType = "50_percent_off";
+            } else if (reason === 'technical') {
+                title.innerText = "Let's fix those bugs.";
+                text.innerText = "Don't leave frustrated. Get a free VIP concierge call.";
+                value.innerText = "FREE VIP SUPPORT";
+                currentOfferType = "vip_support"; 
+                // Note: You would need to add 'vip_support' to your backend later. 
+                // For now, we will treat it like a generic save.
+            } else {
+                title.innerText = "Stay with us a bit longer?";
+                text.innerText = "Pause your account for 2 months instead of cancelling.";
+                value.innerText = "PAUSE (Free)";
+                currentOfferType = "pause_subscription";
             }
         }
-    </script>
 
+        async function acceptOffer() {
+            try {
+                // Determine the URL (Local vs Cloud automatically)
+                // If the URL bar says '127.0.0.1', use local relative path
+                const endpoint = `/accept-offer?customer_id=${customerId}&offer_type=50_percent_off`;
+
+                const response = await fetch(endpoint, { method: 'POST' });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('step-offer').classList.add('hidden');
+                    document.getElementById('step-success').classList.remove('hidden');
+                } else {
+                    alert("Something went wrong on the server.");
+                }
+            } catch (error) {
+                alert("Error connecting to backend! Is your server running?");
+            }
+        }
+
+        function finalCancel() {
+            alert("Customer cancelled. (In a real app, this would delete their account).");
+            closeModal();
+        }
+    </script>
 </body>
 </html>
