@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Offers - RetainAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <nav class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="bg-blue-600 text-white font-bold rounded-lg w-8 h-8 flex items-center justify-center">R</div>
+            <span class="font-bold text-xl tracking-tight">RetainAI</span>
+        </div>
+        <div class="flex gap-4 text-sm font-medium text-gray-500">
+            <a href="/dashboard" class="hover:text-gray-900">Dashboard</a>
+            <a href="#" class="text-blue-600">Settings</a>
+            <a href="#" class="hover:text-gray-900">Logout</a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto mt-10 p-6">
+        
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900">Retention Logic</h1>
+            <p class="text-gray-500">Decide what happens when a user tries to cancel.</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <h3 class="font-bold text-lg">Create New Rule</h3>
+            </div>
+            
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Project ID</label>
+                    <input type="text" id="projectId" value="demo_client_1" class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g. netflix">
+                    <p class="text-xs text-gray-400 mt-1">In a real app, this is hidden (auto-detected from login).</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">If the user selects...</label>
+                    <select id="triggerRule" class="w-full border border-gray-300 rounded-lg p-2 bg-white">
+                        <option value="expensive">"It's too expensive"</option>
+                        <option value="technical">"Technical Issues / Bugs"</option>
+                        <option value="unused">"I don't use it enough"</option>
+                        <option value="alternative">"Found a better alternative"</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Then offer them...</label>
+                    <select id="offerType" class="w-full border border-gray-300 rounded-lg p-2 bg-white">
+                        <option value="percentage_discount">Percentage Discount</option>
+                        <option value="fixed_amount">Fixed Amount ($) Off</option>
+                        <option value="pause">Pause Subscription</option>
+                        <option value="vip_support">VIP Support Call</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                    <div class="relative">
+                        <input type="number" id="offerValue" class="w-full border border-gray-300 rounded-lg p-2 pl-3" placeholder="e.g. 50">
+                        <span class="absolute right-3 top-2 text-gray-400 text-sm" id="value-suffix">%</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stripe Coupon Code</label>
+                    <input type="text" id="couponCode" class="w-full border border-gray-300 rounded-lg p-2 font-mono text-sm uppercase" placeholder="SAVE50">
+                </div>
+
+            </div>
+
+            <div class="p-6 bg-gray-50 flex justify-end gap-3">
+                <button class="px-4 py-2 text-gray-600 font-medium hover:text-gray-900">Cancel</button>
+                <button onclick="saveRule()" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-md transition transform active:scale-95">
+                    Save Logic Rule
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-10">
+            <h3 class="font-bold text-gray-900 mb-4">Active Rules</h3>
+            <div id="rules-list" class="space-y-3">
+                <div class="bg-white p-4 rounded-lg border border-gray-200 flex justify-between items-center">
+                    <div>
+                        <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mr-2">Too Expensive</span>
+                        <span class="text-gray-700">→ Offer <strong>50% Discount</strong> (Code: SAVE50)</span>
+                    </div>
+                    <button class="text-gray-400 hover:text-red-500 text-sm">Delete</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Simple UI logic to change the "Value" label
+        document.getElementById('offerType').addEventListener('change', function() {
+            const type = this.value;
+            const suffix = document.getElementById('value-suffix');
+            if(type === 'percentage_discount') suffix.innerText = '%';
+            else if(type === 'fixed_amount') suffix.innerText = '$';
+            else if(type === 'pause') suffix.innerText = 'Months';
+            else suffix.innerText = '';
+        });
+
+        async function saveRule() {
+            const payload = {
+                project_id: document.getElementById('projectId').value,
+                trigger: document.getElementById('triggerRule').value,
+                type: document.getElementById('offerType').value,
+                value: parseInt(document.getElementById('offerValue').value),
+                code: document.getElementById('couponCode').value
+            };
+
+            try {
+                // Post to your new Python endpoint
+                const response = await fetch('/api/create-offer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    alert("✅ Rule Saved! Your churn flow is now updated.");
+                    // Here you would normally reload the list below
+                } else {
+                    alert("Error saving rule");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Failed to connect to backend.");
+            }
+        }
+    </script>
+</body>
+</html>

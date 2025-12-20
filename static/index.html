@@ -109,19 +109,13 @@
             const text = document.getElementById('offer-text');
             const value = document.getElementById('offer-value');
 
-            if (reason === 'expensive') {
-                title.innerText = "Is price the only issue?";
-                text.innerText = "We can help with that. Claim this discount to stay.";
-                value.innerText = "50% OFF";
-                currentOfferType = "50_percent_off";
-            } else if (reason === 'technical') {
-                title.innerText = "Let's fix those bugs.";
-                text.innerText = "Don't leave frustrated. Get a free VIP concierge call.";
-                value.innerText = "FREE VIP SUPPORT";
-                currentOfferType = "vip_support"; 
-                // Note: You would need to add 'vip_support' to your backend later. 
-                // For now, we will treat it like a generic save.
-            } else {
+         // ... after fetching data from /api/get-offer
+if (data.offer_type === 'percentage_discount') {
+    value.innerText = data.offer_value + "% OFF";
+    text.innerText = "We can apply this code: " + data.coupon_code;
+} else if (data.offer_type === 'pause') {
+    value.innerText = "Pause for " + data.offer_value + " Months";
+} else {
                 title.innerText = "Stay with us a bit longer?";
                 text.innerText = "Pause your account for 2 months instead of cancelling.";
                 value.innerText = "PAUSE (Free)";
