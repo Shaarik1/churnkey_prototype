@@ -207,3 +207,7 @@ async def create_offer(offer: OfferRequest):
     conn.close()
     return {"status": "success", "message": "Custom offer saved!"}
     
+    # --- ADD THIS NEW ROUTE ---
+@app.get("/settings")
+async def read_settings():
+    return FileResponse('static/settings.html')
