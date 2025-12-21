@@ -5,103 +5,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Subscription</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'], }, } }
+        }
+    </script>
     <style>
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none; }
-        /* Ensure the body is truly clear */
+        /* Modern Fade Animation */
+        .fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         body { background-color: transparent !important; }
+        
+        /* Custom Scrollbar for sleekness */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center font-sans">
+<body class="h-screen flex items-center justify-center font-sans antialiased">
 
-    <div id="main-app" class="text-center bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Manage Subscription</h2>
-        <button onclick="startCancellation()" class="text-red-500 font-bold hover:underline">
+    <div id="main-app" class="text-center bg-white p-10 rounded-2xl shadow-xl border border-gray-100 max-w-md w-full mx-4">
+        <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">💳</div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Manage Subscription</h2>
+        <p class="text-gray-500 mb-8">Premium Plan • $100/mo</p>
+        <button onclick="startCancellation()" class="text-red-600 font-semibold hover:text-red-700 hover:bg-red-50 px-6 py-2 rounded-lg transition-colors">
             Cancel Subscription
         </button>
     </div>
 
-    <div id="churn-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden fade-in">
+    <div id="churn-modal" class="fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden fade-in-up border border-gray-100 relative">
             
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
             <div id="step-survey" class="p-8">
-                <h3 class="text-xl font-bold text-gray-900 mb-2">We're sorry to see you go</h3>
-                <p class="text-gray-500 mb-6">To help us improve, could you tell us why you are leaving?</p>
+                <div class="mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Wait, is this goodbye?</h3>
+                    <p class="text-gray-500">We're sorry to see you go. What happened?</p>
+                </div>
                 
                 <div class="space-y-3">
-                    <button onclick="handleSurvey('expensive')" class="survey-btn w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
-                        It's too expensive
+                    <button onclick="handleSurvey('expensive')" class="survey-btn w-full text-left p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md hover:bg-blue-50/50 transition-all duration-200 group">
+                        <span class="font-semibold text-gray-700 group-hover:text-blue-700">It's too expensive</span>
                     </button>
-                    <button onclick="handleSurvey('technical')" class="survey-btn w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
-                        I'm having technical issues
+                    <button onclick="handleSurvey('technical')" class="survey-btn w-full text-left p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md hover:bg-blue-50/50 transition-all duration-200 group">
+                        <span class="font-semibold text-gray-700 group-hover:text-blue-700">I'm having technical issues</span>
                     </button>
-                    <button onclick="handleSurvey('other')" class="survey-btn w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
-                        I found a better alternative
+                    <button onclick="handleSurvey('other')" class="survey-btn w-full text-left p-4 rounded-xl border border-gray-200 hover:border-blue-500 hover:shadow-md hover:bg-blue-50/50 transition-all duration-200 group">
+                        <span class="font-semibold text-gray-700 group-hover:text-blue-700">I found a better alternative</span>
                     </button>
                 </div>
                 
-                <button onclick="closeModal()" class="mt-6 text-gray-400 text-sm hover:text-gray-600">Nevermind, keep my account</button>
+                <button onclick="closeModal()" class="mt-8 text-gray-400 text-sm font-medium hover:text-gray-600 block mx-auto">
+                    Nevermind, I'll stay
+                </button>
             </div>
 
-            <div id="step-offer" class="hidden p-8 bg-gray-50 text-center">
-                <div class="bg-white p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm text-3xl">🎁</div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2" id="offer-title">Wait! Before you go...</h3>
-                <p class="text-gray-600 mb-6" id="offer-text">We'd hate to lose you.</p>
-                
-                <div class="bg-white border-2 border-gray-200 rounded-xl p-6 mb-6">
-                    <p class="text-3xl font-extrabold text-gray-900" id="offer-value">Checking...</p>
+            <div id="step-offer" class="hidden">
+                <div class="bg-gray-50 p-8 text-center border-b border-gray-100 relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                    <div class="relative">
+                        <div class="bg-white p-3 rounded-2xl w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100 text-3xl">
+                            🎁
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900" id="offer-title">Before you go...</h3>
+                        <p class="text-gray-500 text-sm mt-1" id="offer-text">We have a special offer for you.</p>
+                    </div>
                 </div>
 
-                <div class="flex flex-col gap-3">
-                    <button id="accept-btn" onclick="acceptOffer()" class="w-full text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
-                        Accept Offer
-                    </button>
-                    <button onclick="finalCancel()" class="w-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition">
-                        No thanks, proceed to cancel
-                    </button>
+                <div class="p-8">
+                    <div class="bg-blue-50/50 border border-blue-100 rounded-xl p-6 mb-6 text-center">
+                        <p class="text-xs font-bold tracking-wider text-blue-600 uppercase mb-1">Exclusive Offer</p>
+                        <p class="text-4xl font-extrabold text-gray-900 tracking-tight" id="offer-value">Checking...</p>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <button id="accept-btn" onclick="acceptOffer()" class="w-full text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-200">
+                            Accept Offer
+                        </button>
+                        <button onclick="finalCancel()" class="w-full bg-white text-gray-500 font-medium py-3.5 px-4 rounded-xl hover:bg-gray-50 hover:text-gray-700 transition-colors">
+                            No thanks, proceed to cancel
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div id="step-success" class="hidden p-8 text-center">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl">✓</div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Offer Accepted!</h3>
-                <button onclick="closeModal()" class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-lg">Return to Dashboard</button>
+            <div id="step-success" class="hidden p-12 text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Applied!</h3>
+                <p class="text-gray-500 mb-8">Your account has been updated.</p>
+                <button onclick="closeModal()" class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition shadow-lg">
+                    Return to Dashboard
+                </button>
             </div>
 
         </div>
     </div>
 
     <script>
+        // --- JAVASCRIPT LOGIC (Unchanged, just moved here) ---
         const customerId = 'user_' + Math.floor(Math.random() * 1000);
         let currentOfferType = "";
-
-        // --- CHAMELEON MODE: Read Brand Color from URL ---
+        
+        // Brand Color Logic
         const urlParams = new URLSearchParams(window.location.search);
-        const brandColor = urlParams.get('color') || '#2563EB'; // Default to Blue if no color sent
-
-        // Apply color to the Accept Button
+        const brandColor = urlParams.get('color') || '#2563EB'; // Default Blue
         const acceptBtn = document.getElementById('accept-btn');
         acceptBtn.style.backgroundColor = brandColor;
-        
-        // Apply border color on hover for survey buttons (Advanced dynamic CSS)
+
         const surveyBtns = document.querySelectorAll('.survey-btn');
         surveyBtns.forEach(btn => {
             btn.addEventListener('mouseover', () => btn.style.borderColor = brandColor);
             btn.addEventListener('mouseout', () => btn.style.borderColor = '#e5e7eb');
         });
 
-        // -------------------------------------------------
-
-        function startCancellation() {
-            document.getElementById('churn-modal').classList.remove('hidden');
-        }
-
+        function startCancellation() { document.getElementById('churn-modal').classList.remove('hidden'); }
+        
         function closeModal() {
-            // If inside widget, tell parent to close
-            if (window.self !== window.top) {
-                window.parent.postMessage('close-modal', '*');
-            } else {
+            if (window.self !== window.top) { window.parent.postMessage('close-modal', '*'); } 
+            else { 
                 document.getElementById('churn-modal').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
             }
@@ -111,12 +138,10 @@
             document.getElementById('step-survey').classList.add('hidden');
             document.getElementById('step-offer').classList.remove('hidden');
             
-            // Simulating API call for speed
             const projectId = "demo_client_1"; 
             try {
                 const response = await fetch(`/api/get-offer?project_id=${projectId}&reason=${reason}`);
                 const data = await response.json();
-
                 const title = document.getElementById('offer-title');
                 const text = document.getElementById('offer-text');
                 const valueLabel = document.getElementById('offer-value');
@@ -127,16 +152,14 @@
                     acceptBtn.innerText = "Claim Discount";
                 } else if (data.offer_type === 'pause') {
                     title.innerText = "Need a break?";
-                    text.innerText = "Pause your account instead of cancelling.";
-                    valueLabel.innerText = "PAUSE " + data.offer_value + " MO";
+                    text.innerText = "Pause your account for " + data.offer_value + " months.";
+                    valueLabel.innerText = "PAUSE (" + data.offer_value + " MO)";
                     acceptBtn.innerText = "Pause Subscription";
                 } else {
                     valueLabel.innerText = "VIP SUPPORT";
-                    acceptBtn.innerText = "Book Call";
+                    acceptBtn.innerText = "Book Priority Call";
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function acceptOffer() {
@@ -146,12 +169,8 @@
             document.getElementById('step-success').classList.remove('hidden');
         }
 
-        function finalCancel() {
-            alert("Customer cancelled.");
-            closeModal();
-        }
+        function finalCancel() { alert("Customer cancelled."); closeModal(); }
 
-        // AUTO-OPEN IF IN WIDGET
         if (window.self !== window.top) {
             document.getElementById('main-app').classList.add('hidden');
             startCancellation();
