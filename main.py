@@ -1,20 +1,43 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends, status
 from fastapi.staticfiles import StaticFiles 
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials # <--- NEW IMPORTS
 from pydantic import BaseModel
 import stripe
 import sqlite3
 import datetime
+import secrets # Used to compare passwords safely
 
 # --- CONFIGURATION ---
 stripe.api_key = "sk_test_12345" 
 COMMISSION_RATE = 0.20 
 DB_FILE = "churnkey.db"
 
-app = FastAPI()
+# --- ADMIN CREDENTIALS (CHANGE THESE!) ---
+ADMIN_USER = "admin"
+ADMIN_PASSWORD = "password123"
 
-# --- SECURITY ---
+app = FastAPI()
+security = HTTPBasic() # This handles the browser popup
+
+# --- SECURITY LOGIC ---
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    """
+    Checks if the user typed the correct username/password.
+    """
+    correct_user = secrets.compare_digest(credentials.username, ADMIN_USER)
+    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+    
+    if not (correct_user and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,7 +54,6 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-    # 1. Create Saves Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS saves (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,8 +64,6 @@ def init_db():
             date TEXT
         )
     ''')
-
-    # 2. Create Offers Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS offers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,11 +77,10 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
-    print("✅ DATABASE: Tables initialized.")
 
 init_db()
 
-# --- DATA MODELS (The Fix for 422 Error) ---
+# --- DATA MODELS ---
 class OfferRequest(BaseModel):
     project_id: str
     trigger: str
@@ -69,71 +88,35 @@ class OfferRequest(BaseModel):
     value: int
     code: str
 
-# --- API ENDPOINTS ---
+# --- PUBLIC ENDPOINTS (No Login Required) ---
+# These are for the customers/widget. They MUST remain open.
 
-# 1. Create/Update Offer Logic (CORRECTED)
-@app.post("/api/create-offer")
-async def create_offer(offer: OfferRequest):
-    conn = get_db_connection()
-    
-    # Check if a rule already exists for this trigger
-    existing = conn.execute(
-        "SELECT id FROM offers WHERE project_id = ? AND trigger_rule = ?", 
-        (offer.project_id, offer.trigger)
-    ).fetchone()
+@app.get("/")
+async def read_index():
+    return FileResponse('static/index.html')
 
-    if existing:
-        # Update existing rule
-        conn.execute(
-            """UPDATE offers SET offer_type=?, offer_value=?, coupon_code=?, is_active=1 
-               WHERE id=?""",
-            (offer.type, offer.value, offer.code, existing['id'])
-        )
-    else:
-        # Create new rule
-        conn.execute(
-            """INSERT INTO offers 
-               (project_id, trigger_rule, offer_type, offer_value, coupon_code, is_active) 
-               VALUES (?, ?, ?, ?, ?, 1)""",
-            (offer.project_id, offer.trigger, offer.type, offer.value, offer.code)
-        )
-    
-    conn.commit()
-    conn.close()
-    return {"status": "success", "message": "Custom offer saved!"}
-
-# 2. Get Offer Logic
 @app.get("/api/get-offer")
 async def get_offer(project_id: str, reason: str):
     conn = get_db_connection()
-    
-    # Try to find a specific rule for this reason
     offer = conn.execute(
         "SELECT * FROM offers WHERE project_id = ? AND trigger_rule = ? AND is_active = 1",
         (project_id, reason)
     ).fetchone()
     
-    # If no specific rule, find the 'default' fallback
     if not offer:
         offer = conn.execute(
             "SELECT * FROM offers WHERE project_id = ? AND trigger_rule = 'default' AND is_active = 1",
             (project_id,)
         ).fetchone()
-        
     conn.close()
     
-    if offer:
-        return dict(offer)
-    else:
-        return {"offer_type": "pause", "offer_value": 1}
+    if offer: return dict(offer)
+    else: return {"offer_type": "pause", "offer_value": 1}
 
-# 3. Accept Offer (User Action)
 @app.post("/accept-offer")
 async def accept_offer(customer_id: str, offer_type: str):
-    # NOTE: In a real app, calculate 'saved_value' dynamically based on the offer_type
     plan_amount = 100.00 
     saved_value = plan_amount * 0.50 
-    
     conn = get_db_connection()
     conn.execute(
         "INSERT INTO saves (customer_id, offer_type, saved_amount, status, date) VALUES (?, ?, ?, ?, ?)",
@@ -141,10 +124,8 @@ async def accept_offer(customer_id: str, offer_type: str):
     )
     conn.commit()
     conn.close()
-    
     return {"status": "success", "message": "Discount applied!"}
 
-# 4. Stripe Webhook
 @app.post("/webhook")
 async def stripe_webhook(request: Request):
     payload = await request.json()
@@ -156,8 +137,19 @@ async def stripe_webhook(request: Request):
         conn.close()
     return {"status": "success"}
 
-# 5. Dashboard Stats
-@app.get("/dashboard-stats")
+
+# --- PROTECTED ENDPOINTS (Login Required) ---
+# We add `dependencies=[Depends(get_current_username)]` to lock these.
+
+@app.get("/dashboard", dependencies=[Depends(get_current_username)])
+async def read_dashboard():
+    return FileResponse('static/dashboard.html')
+
+@app.get("/settings", dependencies=[Depends(get_current_username)])
+async def read_settings():
+    return FileResponse('static/settings.html')
+
+@app.get("/dashboard-stats", dependencies=[Depends(get_current_username)])
 async def get_dashboard_stats():
     conn = get_db_connection()
     saves = conn.execute("SELECT * FROM saves").fetchall()
@@ -188,18 +180,24 @@ async def get_dashboard_stats():
         "recent_activity": recent_activity[:5]
     }
 
-# --- PAGE ROUTES ---
-@app.get("/")
-async def read_index():
-    return FileResponse('static/index.html')
+@app.post("/run-monthly-billing", dependencies=[Depends(get_current_username)])
+async def run_monthly_billing():
+    # Only the Admin can generate an invoice
+    return {"invoice_total": 100} # Placeholder
 
-@app.get("/dashboard")
-async def read_dashboard():
-    return FileResponse('static/dashboard.html')
+@app.post("/api/create-offer", dependencies=[Depends(get_current_username)])
+async def create_offer(offer: OfferRequest):
+    conn = get_db_connection()
+    existing = conn.execute("SELECT id FROM offers WHERE project_id = ? AND trigger_rule = ?", (offer.project_id, offer.trigger)).fetchone()
 
-@app.get("/settings")
-async def read_settings():
-    return FileResponse('static/settings.html')
+    if existing:
+        conn.execute("UPDATE offers SET offer_type=?, offer_value=?, coupon_code=?, is_active=1 WHERE id=?", (offer.type, offer.value, offer.code, existing['id']))
+    else:
+        conn.execute("INSERT INTO offers (project_id, trigger_rule, offer_type, offer_value, coupon_code, is_active) VALUES (?, ?, ?, ?, ?, 1)", (offer.project_id, offer.trigger, offer.type, offer.value, offer.code))
+    
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": "Custom offer saved!"}
 
-# --- STATIC FILES (Must be last) ---
+# --- STATIC FILES ---
 app.mount("/static", StaticFiles(directory="static"), name="static")
