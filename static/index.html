@@ -6,7 +6,6 @@
     <title>Manage Subscription</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Smooth transitions for the modal */
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none; }
@@ -58,12 +57,12 @@
                 
                 <div class="bg-white border-2 border-blue-100 rounded-xl p-6 mb-6">
                     <p class="text-sm text-blue-600 font-bold uppercase tracking-wide mb-1">Exclusive Offer</p>
-                    <p class="text-3xl font-extrabold text-gray-900" id="offer-value">50% OFF</p>
-                    <p class="text-gray-500 text-sm mt-1">For the next 3 months</p>
+                    <p class="text-3xl font-extrabold text-gray-900" id="offer-value">Checking...</p>
+                    <p class="text-gray-500 text-sm mt-1">Limited time only</p>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button onclick="acceptOffer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
+                    <button id="accept-btn" onclick="acceptOffer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
                         Accept Offer
                     </button>
                     <button onclick="finalCancel()" class="w-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition">
@@ -74,8 +73,8 @@
 
             <div id="step-success" class="hidden p-8 text-center">
                 <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl">✓</div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Discount Applied!</h3>
-                <p class="text-gray-500 mb-6">Your subscription has been updated. You saved $50.00.</p>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Offer Accepted!</h3>
+                <p class="text-gray-500 mb-6">Your subscription has been updated.</p>
                 <button onclick="closeModal()" class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-lg">Return to Dashboard</button>
             </div>
 
@@ -83,7 +82,6 @@
     </div>
 
     <script>
-        // Generate a random ID for this session
         const customerId = 'user_' + Math.floor(Math.random() * 1000);
         let currentOfferType = "";
 
@@ -99,35 +97,64 @@
             document.getElementById('step-success').classList.add('hidden');
         }
 
-        function handleSurvey(reason) {
-            // HIDE SURVEY, SHOW OFFER
+        // --- THIS IS THE CRITICAL PART (CONNECTING TO PYTHON) ---
+        async function handleSurvey(reason) {
+            // 1. Show Loading State
             document.getElementById('step-survey').classList.add('hidden');
             document.getElementById('step-offer').classList.remove('hidden');
+            document.getElementById('offer-value').innerText = "Loading...";
 
-            // DYNAMIC LOGIC: Change the offer based on the reason
-            const title = document.getElementById('offer-title');
-            const text = document.getElementById('offer-text');
-            const value = document.getElementById('offer-value');
+            const projectId = "demo_client_1"; 
+            
+            try {
+                // 2. Fetch the rule from your Database
+                const response = await fetch(`/api/get-offer?project_id=${projectId}&reason=${reason}`);
+                const data = await response.json();
 
-         // ... after fetching data from /api/get-offer
-if (data.offer_type === 'percentage_discount') {
-    value.innerText = data.offer_value + "% OFF";
-    text.innerText = "We can apply this code: " + data.coupon_code;
-} else if (data.offer_type === 'pause') {
-    value.innerText = "Pause for " + data.offer_value + " Months";
-} else {
-                title.innerText = "Stay with us a bit longer?";
-                text.innerText = "Pause your account for 2 months instead of cancelling.";
-                value.innerText = "PAUSE (Free)";
-                currentOfferType = "pause_subscription";
+                // 3. Update the UI based on what the Database said
+                const title = document.getElementById('offer-title');
+                const text = document.getElementById('offer-text');
+                const valueLabel = document.getElementById('offer-value');
+                const btn = document.getElementById('accept-btn');
+
+                // Save the type so we can use it in acceptOffer()
+                currentOfferType = data.offer_type;
+
+                if (data.offer_type === 'percentage_discount') {
+                    title.innerText = "Is price the only issue?";
+                    text.innerText = "We can help. Use code " + data.coupon_code;
+                    valueLabel.innerText = data.offer_value + "% OFF";
+                    btn.innerText = "Claim Discount";
+                } 
+                else if (data.offer_type === 'fixed_amount') {
+                    title.innerText = "Here is a credit for you.";
+                    text.innerText = "We applied a credit to your account.";
+                    valueLabel.innerText = "$" + data.offer_value + " OFF";
+                    btn.innerText = "Claim Credit";
+                }
+                else if (data.offer_type === 'pause') {
+                    title.innerText = "Need a break?";
+                    text.innerText = "You can pause your account instead of cancelling.";
+                    valueLabel.innerText = "PAUSE " + data.offer_value + " MO";
+                    btn.innerText = "Pause Subscription";
+                }
+                else if (data.offer_type === 'vip_support') {
+                    title.innerText = "Let's fix this together.";
+                    text.innerText = "Book a priority call with our founder.";
+                    valueLabel.innerText = "VIP SUPPORT";
+                    btn.innerText = "Book Call";
+                }
+
+            } catch (error) {
+                console.error("Database connection failed", error);
+                document.getElementById('offer-value').innerText = "Error loading offer";
             }
         }
 
         async function acceptOffer() {
             try {
-                // Determine the URL (Local vs Cloud automatically)
-                // If the URL bar says '127.0.0.1', use local relative path
-                const endpoint = `/accept-offer?customer_id=${customerId}&offer_type=50_percent_off`;
+                // Now we use the dynamic 'currentOfferType' instead of hardcoding it
+                const endpoint = `/accept-offer?customer_id=${customerId}&offer_type=${currentOfferType}`;
 
                 const response = await fetch(endpoint, { method: 'POST' });
                 const data = await response.json();
