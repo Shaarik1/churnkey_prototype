@@ -3,47 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RetainAI - Automated Churn Reduction</title>
+    <title>RetainAI - The Revenue Defense Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(to right, #2563EB, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
+        }
+    </style>
 </head>
-<body class="bg-white text-gray-900">
+<body class="bg-white text-slate-900 overflow-x-hidden">
 
-    <nav class="flex justify-between items-center max-w-6xl mx-auto px-6 py-6">
-        <div class="text-2xl font-bold tracking-tighter text-blue-600">RetainAI</div>
-        <div class="space-x-4">
-            <a href="/demo" class="text-gray-600 hover:text-gray-900 font-medium">Try Demo</a>
-            <a href="/dashboard" class="bg-gray-900 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition">Log In</a>
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">R</div>
+                <span class="font-bold text-lg tracking-tight">RetainAI</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="/demo" class="text-sm font-medium text-slate-600 hover:text-slate-900 hidden md:block">Live Demo</a>
+                <a href="/dashboard" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition">Log In</a>
+            </div>
         </div>
     </nav>
 
-    <header class="max-w-4xl mx-auto text-center mt-20 px-6">
-        <div class="inline-block bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-            beta v1.0 • Save 20-40% of Cancellations
-        </div>
-        <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 mb-8 leading-tight">
-            Stop customers from leaving <br>
-            <span class="text-blue-600">without lifting a finger.</span>
-        </h1>
-        <p class="text-xl text-gray-500 mb-10 max-w-2xl mx-auto">
-            RetainAI plugs into your Stripe billing flow. We use intelligent offers to save customers the moment they try to cancel.
-        </p>
-        <div class="flex flex-col md:flex-row gap-4 justify-center">
-            <a href="/demo" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-200">
-                View Live Demo
-            </a>
-            <a href="#" class="bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-200 transition">
-                Talk to Sales
-            </a>
+    <header class="pt-32 pb-20 px-6 hero-glow relative">
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold mb-8 border border-blue-100">
+                <span class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span>
+                Now accepting beta partners
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight text-slate-900">
+                Don't let them <br>
+                <span class="gradient-text">leave empty handed.</span>
+            </h1>
+            <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+                RetainAI plugs into your Stripe billing flow to intercept cancellations with dynamic, personalized offers. Save 20% of churn automatically.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/demo" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
+                    Try the Demo
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+                <a href="mailto:founder@retainai.com" class="bg-white text-slate-700 border border-slate-200 px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-50 transition flex items-center justify-center">
+                    Book Onboarding
+                </a>
+            </div>
         </div>
     </header>
 
-    <div class="mt-20 max-w-5xl mx-auto px-6 pb-20">
-        <div class="bg-gray-900 rounded-2xl p-2 shadow-2xl overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80" alt="Dashboard Preview" class="rounded-xl opacity-90">
+    <section class="max-w-6xl mx-auto px-6 pb-24">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="md:col-span-2 bg-slate-900 rounded-2xl p-8 text-white overflow-hidden relative group">
+                <div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition">
+                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.75 9.5 9.75 12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Drop-in Integration</h3>
+                <p class="text-slate-400 mb-6 text-sm">Works with React, Vue, WordPress, and standard HTML.</p>
+                <div class="bg-black/50 rounded-lg p-4 font-mono text-sm text-green-400 border border-slate-700">
+                    &lt;script src="https://retainai.com/widget.js"&gt;&lt;/script&gt;<br>
+                    &lt;script&gt;<br>
+                    &nbsp;&nbsp;RetainAI.init({ projectId: 'YOUR_ID' });<br>
+                    &lt;/script&gt;
+                </div>
+            </div>
+
+            <div class="bg-blue-600 rounded-2xl p-8 text-white flex flex-col justify-between relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold mb-1">Revenue Saved</h3>
+                    <div class="text-5xl font-extrabold mb-2">$14,203</div>
+                    <div class="text-blue-200 text-sm">Last 30 Days</div>
+                </div>
+                <svg class="absolute bottom-0 left-0 w-full h-24 text-blue-500 opacity-50" fill="currentColor" viewBox="0 0 100 20"><path d="M0 20 L0 15 L20 10 L40 12 L60 5 L80 8 L100 2 L100 20 Z"></path></svg>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Smart Logic</h3>
+                <p class="text-slate-500 text-sm">
+                    If they say "Too Expensive", offer a pause. If they say "Bug", offer support. You set the rules.
+                </p>
+            </div>
+
+            <div class="md:col-span-2 bg-gray-50 border border-slate-200 rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-4">
+                     <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                    </div>
+                     <h3 class="text-xl font-bold text-slate-900">100% Whitelabel</h3>
+                </div>
+                <p class="text-slate-500 text-sm mb-6">
+                    Our widget adapts to your brand colors automatically. It looks like your native product, not a third-party tool.
+                </p>
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 ring-2 ring-offset-2 ring-blue-600"></div>
+                    <div class="w-8 h-8 rounded-full bg-red-600"></div>
+                    <div class="w-8 h-8 rounded-full bg-green-600"></div>
+                    <div class="w-8 h-8 rounded-full bg-black"></div>
+                </div>
+            </div>
+
         </div>
-    </div>
+    </section>
+
+    <footer class="border-t border-slate-100 py-12 text-center text-slate-400 text-sm">
+        <p>&copy; 2025 RetainAI. Built for SaaS Founders.</p>
+    </footer>
 
 </body>
 </html>
