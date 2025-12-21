@@ -109,30 +109,51 @@
             else suffix.innerText = '';
         });
 
-        async function saveRule() {
+    async function saveRule() {
+            // 1. GET THE VALUES
+            const projectIdInput = document.getElementById('projectId').value;
+            const triggerInput = document.getElementById('triggerRule').value;
+            const typeInput = document.getElementById('offerType').value;
+            const valueInput = document.getElementById('offerValue').value;
+            const codeInput = document.getElementById('couponCode').value;
+
+            // 2. SAFETY CHECKS (Prevent 422 Errors)
+            // If the user leaves the box empty, default to 0
+            let finalValue = parseInt(valueInput);
+            if (isNaN(finalValue)) {
+                finalValue = 0; 
+            }
+
+            // If Coupon Code is empty, put a placeholder
+            let finalCode = codeInput;
+            if (!finalCode) {
+                finalCode = "DEFAULT";
+            }
+
             const payload = {
-                project_id: document.getElementById('projectId').value,
-                trigger: document.getElementById('triggerRule').value,
-                type: document.getElementById('offerType').value,
-                value: parseInt(document.getElementById('offerValue').value),
-                code: document.getElementById('couponCode').value
+                project_id: projectIdInput,
+                trigger: triggerInput,
+                type: typeInput,
+                value: finalValue, // Now guaranteed to be a number
+                code: finalCode
             };
 
+            // Debugging: Log what we are sending so you can see it
+            console.log("Sending Payload:", payload);
+
             try {
-                // Post to your new Python endpoint
                 const response = await fetch('/api/create-offer', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 
-                const result = await response.json();
-                
-                if(result.status === 'success') {
-                    alert("✅ Rule Saved! Your churn flow is now updated.");
-                    // Here you would normally reload the list below
+                if (response.ok) {
+                    const result = await response.json();
+                    alert("✅ Rule Saved! Success.");
                 } else {
-                    alert("Error saving rule");
+                    // If it fails, alert the exact error status
+                    alert("Failed to save. Error Code: " + response.status);
                 }
             } catch (error) {
                 console.error(error);
