@@ -9,24 +9,20 @@
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none; }
+        /* Ensure the body is truly clear */
+        body { background-color: transparent !important; }
     </style>
 </head>
-<body class="bg-gray-100 h-screen flex items-center justify-center font-sans">
+<body class="h-screen flex items-center justify-center font-sans">
 
-    <div id="main-app" class="text-center">
-        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md mx-auto">
-            <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Manage Subscription</h2>
-            <p class="text-gray-500 mb-6">Current Plan: <strong>Pro ($100/mo)</strong></p>
-            <button onclick="startCancellation()" class="text-red-500 hover:text-red-700 font-medium text-sm hover:underline">
-                Cancel Subscription
-            </button>
-        </div>
+    <div id="main-app" class="text-center bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Manage Subscription</h2>
+        <button onclick="startCancellation()" class="text-red-500 font-bold hover:underline">
+            Cancel Subscription
+        </button>
     </div>
 
-    <div id="churn-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+    <div id="churn-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden fade-in">
             
             <div id="step-survey" class="p-8">
@@ -34,35 +30,31 @@
                 <p class="text-gray-500 mb-6">To help us improve, could you tell us why you are leaving?</p>
                 
                 <div class="space-y-3">
-                    <button onclick="handleSurvey('expensive')" class="w-full text-left p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition group">
-                        <span class="font-medium text-gray-700 group-hover:text-blue-700">It's too expensive</span>
+                    <button onclick="handleSurvey('expensive')" class="survey-btn w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
+                        It's too expensive
                     </button>
-                    <button onclick="handleSurvey('technical')" class="w-full text-left p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition group">
-                        <span class="font-medium text-gray-700 group-hover:text-blue-700">I'm having technical issues</span>
+                    <button onclick="handleSurvey('technical')" class="survey-btn w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
+                        I'm having technical issues
                     </button>
-                    <button onclick="handleSurvey('other')" class="w-full text-left p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 transition group">
-                        <span class="font-medium text-gray-700 group-hover:text-blue-700">I found a better alternative</span>
+                    <button onclick="handleSurvey('other')" class="survey-btn w-full text-left p-4 border rounded-lg hover:bg-gray-50 transition">
+                        I found a better alternative
                     </button>
                 </div>
                 
                 <button onclick="closeModal()" class="mt-6 text-gray-400 text-sm hover:text-gray-600">Nevermind, keep my account</button>
             </div>
 
-            <div id="step-offer" class="hidden p-8 bg-blue-50 text-center">
-                <div class="bg-white p-2 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <span class="text-2xl">🎁</span>
-                </div>
+            <div id="step-offer" class="hidden p-8 bg-gray-50 text-center">
+                <div class="bg-white p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm text-3xl">🎁</div>
                 <h3 class="text-xl font-bold text-gray-900 mb-2" id="offer-title">Wait! Before you go...</h3>
-                <p class="text-gray-600 mb-6" id="offer-text">We'd hate to lose you. Here is a special offer.</p>
+                <p class="text-gray-600 mb-6" id="offer-text">We'd hate to lose you.</p>
                 
-                <div class="bg-white border-2 border-blue-100 rounded-xl p-6 mb-6">
-                    <p class="text-sm text-blue-600 font-bold uppercase tracking-wide mb-1">Exclusive Offer</p>
+                <div class="bg-white border-2 border-gray-200 rounded-xl p-6 mb-6">
                     <p class="text-3xl font-extrabold text-gray-900" id="offer-value">Checking...</p>
-                    <p class="text-gray-500 text-sm mt-1">Limited time only</p>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button id="accept-btn" onclick="acceptOffer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
+                    <button id="accept-btn" onclick="acceptOffer()" class="w-full text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
                         Accept Offer
                     </button>
                     <button onclick="finalCancel()" class="w-full bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition">
@@ -74,7 +66,6 @@
             <div id="step-success" class="hidden p-8 text-center">
                 <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl">✓</div>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">Offer Accepted!</h3>
-                <p class="text-gray-500 mb-6">Your subscription has been updated.</p>
                 <button onclick="closeModal()" class="w-full bg-gray-900 text-white font-bold py-3 px-4 rounded-lg">Return to Dashboard</button>
             </div>
 
@@ -85,94 +76,85 @@
         const customerId = 'user_' + Math.floor(Math.random() * 1000);
         let currentOfferType = "";
 
+        // --- CHAMELEON MODE: Read Brand Color from URL ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const brandColor = urlParams.get('color') || '#2563EB'; // Default to Blue if no color sent
+
+        // Apply color to the Accept Button
+        const acceptBtn = document.getElementById('accept-btn');
+        acceptBtn.style.backgroundColor = brandColor;
+        
+        // Apply border color on hover for survey buttons (Advanced dynamic CSS)
+        const surveyBtns = document.querySelectorAll('.survey-btn');
+        surveyBtns.forEach(btn => {
+            btn.addEventListener('mouseover', () => btn.style.borderColor = brandColor);
+            btn.addEventListener('mouseout', () => btn.style.borderColor = '#e5e7eb');
+        });
+
+        // -------------------------------------------------
+
         function startCancellation() {
             document.getElementById('churn-modal').classList.remove('hidden');
         }
 
         function closeModal() {
-            document.getElementById('churn-modal').classList.add('hidden');
-            // Reset views
-            document.getElementById('step-survey').classList.remove('hidden');
-            document.getElementById('step-offer').classList.add('hidden');
-            document.getElementById('step-success').classList.add('hidden');
+            // If inside widget, tell parent to close
+            if (window.self !== window.top) {
+                window.parent.postMessage('close-modal', '*');
+            } else {
+                document.getElementById('churn-modal').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            }
         }
 
-        // --- THIS IS THE CRITICAL PART (CONNECTING TO PYTHON) ---
         async function handleSurvey(reason) {
-            // 1. Show Loading State
             document.getElementById('step-survey').classList.add('hidden');
             document.getElementById('step-offer').classList.remove('hidden');
-            document.getElementById('offer-value').innerText = "Loading...";
-
-            const projectId = "demo_client_1"; 
             
+            // Simulating API call for speed
+            const projectId = "demo_client_1"; 
             try {
-                // 2. Fetch the rule from your Database
                 const response = await fetch(`/api/get-offer?project_id=${projectId}&reason=${reason}`);
                 const data = await response.json();
 
-                // 3. Update the UI based on what the Database said
                 const title = document.getElementById('offer-title');
                 const text = document.getElementById('offer-text');
                 const valueLabel = document.getElementById('offer-value');
-                const btn = document.getElementById('accept-btn');
-
-                // Save the type so we can use it in acceptOffer()
                 currentOfferType = data.offer_type;
 
                 if (data.offer_type === 'percentage_discount') {
-                    title.innerText = "Is price the only issue?";
-                    text.innerText = "We can help. Use code " + data.coupon_code;
                     valueLabel.innerText = data.offer_value + "% OFF";
-                    btn.innerText = "Claim Discount";
-                } 
-                else if (data.offer_type === 'fixed_amount') {
-                    title.innerText = "Here is a credit for you.";
-                    text.innerText = "We applied a credit to your account.";
-                    valueLabel.innerText = "$" + data.offer_value + " OFF";
-                    btn.innerText = "Claim Credit";
-                }
-                else if (data.offer_type === 'pause') {
+                    acceptBtn.innerText = "Claim Discount";
+                } else if (data.offer_type === 'pause') {
                     title.innerText = "Need a break?";
-                    text.innerText = "You can pause your account instead of cancelling.";
+                    text.innerText = "Pause your account instead of cancelling.";
                     valueLabel.innerText = "PAUSE " + data.offer_value + " MO";
-                    btn.innerText = "Pause Subscription";
-                }
-                else if (data.offer_type === 'vip_support') {
-                    title.innerText = "Let's fix this together.";
-                    text.innerText = "Book a priority call with our founder.";
+                    acceptBtn.innerText = "Pause Subscription";
+                } else {
                     valueLabel.innerText = "VIP SUPPORT";
-                    btn.innerText = "Book Call";
+                    acceptBtn.innerText = "Book Call";
                 }
-
-            } catch (error) {
-                console.error("Database connection failed", error);
-                document.getElementById('offer-value').innerText = "Error loading offer";
+            } catch (e) {
+                console.error(e);
             }
         }
 
         async function acceptOffer() {
-            try {
-                // Now we use the dynamic 'currentOfferType' instead of hardcoding it
-                const endpoint = `/accept-offer?customer_id=${customerId}&offer_type=${currentOfferType}`;
-
-                const response = await fetch(endpoint, { method: 'POST' });
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    document.getElementById('step-offer').classList.add('hidden');
-                    document.getElementById('step-success').classList.remove('hidden');
-                } else {
-                    alert("Something went wrong on the server.");
-                }
-            } catch (error) {
-                alert("Error connecting to backend! Is your server running?");
-            }
+            const endpoint = `/accept-offer?customer_id=${customerId}&offer_type=${currentOfferType}`;
+            await fetch(endpoint, { method: 'POST' });
+            document.getElementById('step-offer').classList.add('hidden');
+            document.getElementById('step-success').classList.remove('hidden');
         }
 
         function finalCancel() {
-            alert("Customer cancelled. (In a real app, this would delete their account).");
+            alert("Customer cancelled.");
             closeModal();
+        }
+
+        // AUTO-OPEN IF IN WIDGET
+        if (window.self !== window.top) {
+            document.getElementById('main-app').classList.add('hidden');
+            startCancellation();
         }
     </script>
 </body>

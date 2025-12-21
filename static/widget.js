@@ -1,15 +1,13 @@
 (function() {
     console.log("RetainAI Widget Loaded");
 
-    // 1. Configuration
-    const CONFIG = {
-        // This points to YOUR Render URL
-        iframeUrl: "https://churnkey-demo.onrender.com/demo", 
-        // In a real app, this would be passed by the client
-        projectId: document.currentScript.getAttribute('data-project-id') || 'demo_client_1'
+    // 1. Get User Configuration or Defaults
+    // This allows the client to do: RetainAI.init({ color: '#E50914' })
+    let config = {
+        color: '#2563EB', // Default Blue
+        projectId: 'demo_client_1'
     };
 
-    // 2. Create the Modal Container (Hidden by default)
     const container = document.createElement('div');
     container.id = 'retain-ai-container';
     container.style.position = 'fixed';
@@ -17,32 +15,45 @@
     container.style.left = '0';
     container.style.width = '100vw';
     container.style.height = '100vh';
-    container.style.zIndex = '999999'; // On top of everything
-    container.style.display = 'none'; // Hidden initially
-    container.style.backgroundColor = 'rgba(0,0,0,0.5)'; // Dim background
+    container.style.zIndex = '999999';
+    container.style.display = 'none';
+    
+    // Transparent background for the iframe container
+    // This lets the client site show through!
+    container.style.backgroundColor = 'transparent'; 
 
-    // 3. Create the Iframe
     const iframe = document.createElement('iframe');
-    iframe.src = CONFIG.iframeUrl;
     iframe.style.width = '100%';
     iframe.style.height = '100%';
     iframe.style.border = 'none';
-    iframe.style.background = 'transparent';
     
+    // IMPORTANT: Make iframe background transparent
+    iframe.allowTransparency = "true"; 
+
     container.appendChild(iframe);
     document.body.appendChild(container);
 
-    // 4. The Public API (How the client triggers it)
     window.RetainAI = {
+        init: function(userConfig) {
+            if (userConfig) {
+                config = { ...config, ...userConfig };
+            }
+            // Update URL with the requested Brand Color
+            iframe.src = `https://churnkey-demo.onrender.com/demo?color=${encodeURIComponent(config.color)}`;
+        },
         open: function() {
             container.style.display = 'block';
         },
         close: function() {
             container.style.display = 'none';
+            // Reload iframe to reset state for next time
+            iframe.src = iframe.src; 
         }
     };
 
-    // 5. Listen for "Close" messages from inside the iframe
+    // Default init
+    window.RetainAI.init();
+
     window.addEventListener('message', function(event) {
         if (event.data === 'close-modal') {
             window.RetainAI.close();
