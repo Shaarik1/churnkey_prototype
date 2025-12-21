@@ -91,9 +91,21 @@ class OfferRequest(BaseModel):
 # --- PUBLIC ENDPOINTS (No Login Required) ---
 # These are for the customers/widget. They MUST remain open.
 
+# --- PUBLIC ROUTES ---
 @app.get("/")
-async def read_index():
+async def read_landing():
+    # Shows the new Marketing Homepage
     return FileResponse('static/index.html')
+
+@app.get("/demo")
+async def read_demo():
+    # Shows the Cancellation Flow (formerly index.html)
+    return FileResponse('static/demo.html')
+
+# --- PROTECTED ROUTES (Login Required) ---
+@app.get("/setup", dependencies=[Depends(get_current_username)])
+async def read_setup():
+    return FileResponse('static/setup.html')
 
 @app.get("/api/get-offer")
 async def get_offer(project_id: str, reason: str):
