@@ -41,8 +41,22 @@ def init_db():
             date TEXT
         )
     ''')
+
+    # 2. Create the OFFERS table (New!)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS offers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id TEXT NOT NULL,
+            trigger_rule TEXT,
+            offer_type TEXT,
+            offer_value INTEGER,
+            coupon_code TEXT,
+            is_active INTEGER DEFAULT 1
+        )
+    ''')
     conn.commit()
     conn.close()
+    print("✅ DATABASE: Tables initialized.")
 
 init_db()
 
