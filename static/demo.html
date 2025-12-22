@@ -138,7 +138,11 @@
             document.getElementById('step-survey').classList.add('hidden');
             document.getElementById('step-offer').classList.remove('hidden');
             
-            const projectId = "demo_client_1"; 
+            // --- FIX: READ ID FROM URL ---
+            const urlParams = new URLSearchParams(window.location.search);
+            // If the widget sent an ID, use it. Otherwise use default.
+            const projectId = urlParams.get('project_id') || "demo_client_1"; 
+            
             try {
                 const response = await fetch(`/api/get-offer?project_id=${projectId}&reason=${reason}`);
                 const data = await response.json();

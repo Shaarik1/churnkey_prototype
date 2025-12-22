@@ -1,11 +1,9 @@
 (function() {
     console.log("RetainAI Widget Loaded");
 
-    // 1. Get User Configuration or Defaults
-    // This allows the client to do: RetainAI.init({ color: '#E50914' })
     let config = {
-        color: '#2563EB', // Default Blue
-        projectId: 'demo_client_1'
+        color: '#2563EB',
+        projectId: 'demo_client_1' // Default if they forget to set one
     };
 
     const container = document.createElement('div');
@@ -17,17 +15,12 @@
     container.style.height = '100vh';
     container.style.zIndex = '999999';
     container.style.display = 'none';
-    
-    // Transparent background for the iframe container
-    // This lets the client site show through!
     container.style.backgroundColor = 'transparent'; 
 
     const iframe = document.createElement('iframe');
     iframe.style.width = '100%';
     iframe.style.height = '100%';
     iframe.style.border = 'none';
-    
-    // IMPORTANT: Make iframe background transparent
     iframe.allowTransparency = "true"; 
 
     container.appendChild(iframe);
@@ -38,26 +31,24 @@
             if (userConfig) {
                 config = { ...config, ...userConfig };
             }
-            // Update URL with the requested Brand Color
-            iframe.src = `https://churnkey-demo.onrender.com/demo?color=${encodeURIComponent(config.color)}`;
+            // FIX: We now pass BOTH color AND project_id to the iframe
+            const iframeUrl = `https://churnkey-demo.onrender.com/demo?color=${encodeURIComponent(config.color)}&project_id=${encodeURIComponent(config.projectId)}`;
+            iframe.src = iframeUrl;
         },
         open: function() {
             container.style.display = 'block';
         },
         close: function() {
             container.style.display = 'none';
-            // Reload iframe to reset state for next time
-            iframe.src = iframe.src; 
+            iframe.src = iframe.src; // Reset state
         }
     };
 
-    // Default init
-    window.RetainAI.init();
+    window.RetainAI.init(); // Run defaults
 
     window.addEventListener('message', function(event) {
         if (event.data === 'close-modal') {
             window.RetainAI.close();
         }
     });
-
 })();
