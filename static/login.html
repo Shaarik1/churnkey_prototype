@@ -37,8 +37,8 @@
         <p id="error-msg" class="text-red-500 text-sm mt-4 text-center hidden">Invalid username or password.</p>
     </div>
 
-    <p class="mt-8 text-center text-gray-400 text-sm">
-        &copy; 2025 RetainAI Inc.
+    <p class="mt-8 text-center text-gray-500 text-sm">
+        Don't have an account? <a href="/signup" class="text-blue-600 font-bold hover:underline">Sign up</a>
     </p>
 
     <script>
@@ -49,13 +49,11 @@
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
 
-            // UI Loading State
             btn.innerText = "Checking...";
             btn.disabled = true;
             errorMsg.classList.add('hidden');
 
             try {
-                // Send credentials to Python
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -63,10 +61,8 @@
                 });
 
                 if (response.ok) {
-                    // Success! Go to dashboard
                     window.location.href = "/dashboard";
                 } else {
-                    // Failed
                     errorMsg.classList.remove('hidden');
                     btn.innerText = "Sign In";
                     btn.disabled = false;
