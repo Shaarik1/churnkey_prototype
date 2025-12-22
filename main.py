@@ -149,6 +149,13 @@ async def logout(response: Response):
     response.delete_cookie("session_token")
     return response
 
+# --- USER INFO API ---
+@app.get("/api/me")
+async def get_my_info(user: str = Depends(get_current_user)):
+    # The dependency 'get_current_user' checks the cookie 
+    # and returns the username (e.g., "tesla")
+    return {"username": user}
+
 
 # --- PROTECTED PAGES ---
 @app.get("/dashboard")

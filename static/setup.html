@@ -26,6 +26,10 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 Integration
             </a>
+            <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-lg font-medium transition mt-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Sign Out
+            </a>
         </nav>
     </aside>
 
@@ -38,21 +42,25 @@
         <div class="max-w-3xl space-y-8">
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <h3 class="font-bold text-gray-800 flex items-center gap-2">
                         <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
                         Install Frontend Widget
                     </h3>
                 </div>
                 <div class="p-6">
-                    <p class="text-sm text-gray-600 mb-4">Paste this into the <code>&lt;head&gt;</code> of your website.</p>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Enter your Username (Project ID)</label>
+                        <input type="text" id="username-input" oninput="updateCode()" placeholder="e.g. netflix" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <p class="text-xs text-gray-500 mt-1">Type your username to generate the correct code.</p>
+                    </div>
+
                     <div class="relative group">
-                        <div class="absolute -top-3 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">Copy</div>
-                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-sm font-mono overflow-x-auto"><code>&lt;script src="https://churnkey-demo.onrender.com/static/widget.js"&gt;&lt;/script&gt;
+                        <pre class="bg-gray-900 text-gray-100 rounded-lg p-4 text-sm font-mono overflow-x-auto"><code id="code-block">&lt;script src="https://churnkey-demo.onrender.com/static/widget.js"&gt;&lt;/script&gt;
 &lt;script&gt;
   RetainAI.init({ 
-    projectId: 'CLIENT_ID',
-    color: '#2563EB' // Your Brand Color
+    projectId: 'YOUR_USERNAME',
+    color: '#2563EB'
   });
 &lt;/script&gt;</code></pre>
                     </div>
@@ -60,7 +68,7 @@
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <h3 class="font-bold text-gray-800 flex items-center gap-2">
                         <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
                         Configure Stripe Webhook
@@ -79,5 +87,19 @@
 
         </div>
     </main>
+
+    <script>
+        function updateCode() {
+            const user = document.getElementById('username-input').value || 'YOUR_USERNAME';
+            const code = `<script src="https://churnkey-demo.onrender.com/static/widget.js"><\/script>
+<script>
+  RetainAI.init({ 
+    projectId: '${user}',
+    color: '#2563EB'
+  });
+<\/script>`;
+            document.getElementById('code-block').innerText = code;
+        }
+    </script>
 </body>
 </html>
