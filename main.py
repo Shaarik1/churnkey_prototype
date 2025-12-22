@@ -177,9 +177,19 @@ async def read_setup(request: Request):
 
 # --- APP LOGIC ---
 @app.get("/dashboard-stats")
-async def get_dashboard_stats(user: str = Depends(get_current_user)):
+async def get_dashboard_stats(request: Request, month: str = None, user: str = Depends(get_current_user)):
     conn = get_db_connection()
-    saves = conn.execute("SELECT * FROM saves").fetchall()
+    
+    # Base query
+    query = "SELECT * FROM saves"
+    params = []
+
+    # If a month is selected (Format: YYYY-MM), filter by it
+    if month:
+        query += " WHERE date LIKE ?"
+        params.append(f"{month}%")
+    
+    saves = conn.execute(query, params).fetchall()
     conn.close()
     
     total_saved = 0
@@ -204,7 +214,7 @@ async def get_dashboard_stats(user: str = Depends(get_current_user)):
         "your_commission": total_commission,
         "verified_deals": verified_count,
         "pending_deals": pending_count,
-        "recent_activity": recent_activity[:5]
+        "recent_activity": recent_activity # No limit, show all for that month
     }
 
 @app.post("/api/create-offer")

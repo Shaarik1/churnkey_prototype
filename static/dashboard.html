@@ -40,16 +40,24 @@
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-8">
+ <main class="flex-1 overflow-y-auto p-8">
         
-        <header class="flex justify-between items-center mb-8">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-                <p class="text-gray-500">Welcome back, Admin.</p>
+                <p class="text-gray-500">Track your revenue and commission.</p>
             </div>
-            <button onclick="refreshStats()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 shadow-sm transition">
-                Refresh Data
-            </button>
+            
+            <div class="flex items-center gap-3 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
+                <span class="text-sm text-gray-500 font-medium pl-2">Filter:</span>
+                <input type="month" id="month-picker" onchange="refreshStats()" class="outline-none text-gray-700 font-bold bg-transparent cursor-pointer">
+                
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
+                
+                <button onclick="clearFilter()" class="text-xs text-blue-600 font-bold hover:underline px-2">
+                    All Time
+                </button>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -104,11 +112,21 @@
 
     </main>
 
-    <script>
+   <script>
         async function refreshStats() {
             try {
-                const response = await fetch('/dashboard-stats');
-                if (response.status === 401) window.location.href = '/settings'; // Redirect if not logged in
+                // 1. Check if a month is selected
+                const monthInput = document.getElementById('month-picker').value;
+                let url = '/dashboard-stats';
+                
+                // 2. Add filter to URL if exists
+                if (monthInput) {
+                    url += `?month=${monthInput}`;
+                }
+
+                const response = await fetch(url);
+                if (response.status === 401) window.location.href = '/login';
+                
                 const data = await response.json();
 
                 // Animate Numbers
@@ -120,23 +138,34 @@
                 const tbody = document.getElementById('activity-table');
                 tbody.innerHTML = '';
 
-                data.recent_activity.forEach(item => {
-                    const statusColor = item.status === 'verified' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-                    const row = `
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 font-medium text-gray-900">${item.customer_id}</td>
-                            <td class="px-6 py-4">${item.offer_type}</td>
-                            <td class="px-6 py-4 font-bold text-green-600">$${item.saved_amount}</td>
-                            <td class="px-6 py-4"><span class="${statusColor} px-2 py-1 rounded-full text-xs font-bold uppercase">${item.status}</span></td>
-                            <td class="px-6 py-4 text-gray-400">${new Date(item.date).toLocaleDateString()}</td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
-                });
+                if (data.recent_activity.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">No activity found for this period.</td></tr>';
+                } else {
+                    data.recent_activity.forEach(item => {
+                        const statusColor = item.status === 'verified' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                        const row = `
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 font-medium text-gray-900">${item.customer_id}</td>
+                                <td class="px-6 py-4">${item.offer_type}</td>
+                                <td class="px-6 py-4 font-bold text-green-600">$${item.saved_amount}</td>
+                                <td class="px-6 py-4"><span class="${statusColor} px-2 py-1 rounded-full text-xs font-bold uppercase">${item.status}</span></td>
+                                <td class="px-6 py-4 text-gray-400">${new Date(item.date).toLocaleDateString()}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                }
             } catch (err) {
                 console.error("Error fetching stats:", err);
             }
         }
+
+        function clearFilter() {
+            document.getElementById('month-picker').value = '';
+            refreshStats();
+        }
+
+        // Load data on startup
         refreshStats();
     </script>
 </body>
