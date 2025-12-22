@@ -147,15 +147,20 @@
                 const valueLabel = document.getElementById('offer-value');
                 currentOfferType = data.offer_type;
 
+                // --- USE CUSTOM TEXT IF AVAILABLE ---
+                if (data.offer_title) title.innerText = data.offer_title;
+                if (data.offer_body) text.innerText = data.offer_body;
+
                 if (data.offer_type === 'percentage_discount') {
                     valueLabel.innerText = data.offer_value + "% OFF";
                     acceptBtn.innerText = "Claim Discount";
                 } else if (data.offer_type === 'pause') {
-                    title.innerText = "Need a break?";
-                    text.innerText = "Pause your account for " + data.offer_value + " months.";
-                    valueLabel.innerText = "PAUSE (" + data.offer_value + " MO)";
+                    if (!data.offer_title) title.innerText = "Need a break?"; // Fallback
+                    if (!data.offer_body) text.innerText = "Pause your account instead of cancelling.";
+                    valueLabel.innerText = "PAUSE " + data.offer_value + " MO";
                     acceptBtn.innerText = "Pause Subscription";
-                } else {
+                }
+                else {
                     valueLabel.innerText = "VIP SUPPORT";
                     acceptBtn.innerText = "Book Priority Call";
                 }
