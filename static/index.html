@@ -9,41 +9,38 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* THE APPLE GRADIENT BACKGROUND */
+        /* DEEP DARK BACKGROUND (Better Contrast) */
         .mesh-bg {
-            background-color: #f3f4f6;
+            background-color: #020617; /* Slate 950 (Almost Black) */
             background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            background-size: 100% 100%;
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%), 
+                radial-gradient(circle at 85% 30%, rgba(147, 51, 234, 0.08), transparent 25%);
             min-height: 100vh;
         }
 
-        /* THE GLASS EFFECT */
+        /* DARKER GLASS (Easier to read text on) */
         .glass {
-            background: rgba(255, 255, 255, 0.05); /* Very see-through */
-            backdrop-filter: blur(20px);            /* The Frost */
-            -webkit-backdrop-filter: blur(20px);    /* Safari Support */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(2, 6, 23, 0.7); /* Darker base */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03); /* Very subtle white tint */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
             transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
 
-        /* TEXT GRADIENT */
+        /* CRISP TEXT GRADIENT */
         .text-glow {
-            background: linear-gradient(to right, #60a5fa, #c084fc);
+            background: linear-gradient(to right, #60a5fa, #a855f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -51,15 +48,15 @@
 </head>
 <body class="mesh-bg text-white overflow-x-hidden selection:bg-blue-500 selection:text-white">
 
-    <nav class="fixed w-full z-50 glass border-b-0">
+    <nav class="fixed w-full z-50 glass">
         <div class="max-w-6xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">R</div>
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-900/50">R</div>
                 <span class="font-bold text-lg tracking-tight text-white">RetainAI</span>
             </div>
             <div class="flex items-center gap-6">
-                <a href="/login" class="text-sm font-medium text-gray-300 hover:text-white transition">Log In</a>
-                <a href="/signup" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-100 transition shadow-lg shadow-white/10">
+                <a href="/login" class="text-sm font-medium text-gray-200 hover:text-white transition">Log In</a>
+                <a href="/signup" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition">
                     Get Started
                 </a>
             </div>
@@ -69,9 +66,9 @@
     <header class="pt-40 pb-20 px-6 relative">
         <div class="max-w-4xl mx-auto text-center relative z-10">
             
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass mb-8 border border-white/10">
-                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></span>
-                <span class="text-sm font-medium text-gray-200">System Online v1.0</span>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 mb-8">
+                <span class="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(96,165,250,0.5)]"></span>
+                <span class="text-sm font-medium text-blue-100">Now accepting beta partners</span>
             </div>
 
             <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
@@ -79,12 +76,12 @@
                 <span class="text-glow">Automatically.</span>
             </h1>
             
-            <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+            <p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
                 The intelligent layer that sits between your customer and the cancel button. Turn lost revenue into retained profit with one line of code.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="/demo" class="group relative px-8 py-4 bg-white text-black rounded-full font-bold text-lg hover:scale-105 transition duration-200 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]">
+                <a href="/demo" class="group relative px-8 py-4 bg-white text-black rounded-full font-bold text-lg hover:scale-105 transition duration-200">
                     <span class="relative z-10 flex items-center gap-2">
                         Watch Demo 
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -101,29 +98,29 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             <div class="md:col-span-2 glass-card rounded-3xl p-8 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-12 bg-blue-600/20 blur-3xl rounded-full w-32 h-32 group-hover:bg-blue-600/30 transition duration-500"></div>
+                <div class="absolute top-0 right-0 p-12 bg-blue-600/10 blur-3xl rounded-full w-32 h-32"></div>
                 
-                <h3 class="text-2xl font-bold mb-2">Drop-in Integration</h3>
-                <p class="text-gray-400 mb-6">Works with every stack. Copy, paste, retain.</p>
+                <h3 class="text-2xl font-bold mb-2 text-white">Drop-in Integration</h3>
+                <p class="text-gray-300 mb-6">Works with every stack. Copy, paste, retain.</p>
                 
-                <div class="bg-black/40 backdrop-blur-md rounded-xl p-5 font-mono text-sm border border-white/10 shadow-inner">
+                <div class="bg-black/80 backdrop-blur-md rounded-xl p-5 font-mono text-sm border border-white/10">
                     <div class="flex gap-2 mb-3">
                         <div class="w-3 h-3 rounded-full bg-red-500"></div>
                         <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                         <div class="w-3 h-3 rounded-full bg-green-500"></div>
                     </div>
-                    <p class="text-blue-300">&lt;script <span class="text-purple-300">src</span>="<span class="text-green-300">.../widget.js</span>"&gt;&lt;/script&gt;</p>
+                    <p class="text-blue-400">&lt;script <span class="text-purple-400">src</span>="<span class="text-green-400">.../widget.js</span>"&gt;&lt;/script&gt;</p>
                     <p class="text-gray-500 mt-1">// That's it. You are live.</p>
                 </div>
             </div>
 
             <div class="glass-card rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden group">
-                <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-green-500/20 to-transparent opacity-50 group-hover:opacity-100 transition"></div>
+                <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-blue-900/20 to-transparent opacity-50"></div>
                 <div>
                     <h3 class="text-xl font-bold text-gray-200">Recovered</h3>
                     <p class="text-5xl font-bold mt-2 text-white tracking-tight">$12,400</p>
                 </div>
-                <div class="mt-4 flex items-center gap-2 text-green-400 text-sm font-medium bg-green-500/10 w-fit px-2 py-1 rounded-lg">
+                <div class="mt-4 flex items-center gap-2 text-green-400 text-sm font-medium bg-green-400/10 w-fit px-3 py-1 rounded-full border border-green-400/20">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                     +24% this month
                 </div>
@@ -132,15 +129,15 @@
             <div class="glass-card rounded-3xl p-8 md:col-span-3">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-8">
                     <div class="max-w-md">
-                        <h3 class="text-2xl font-bold mb-3">Intelligent Logic Rules</h3>
-                        <p class="text-gray-400">
+                        <h3 class="text-2xl font-bold mb-3 text-white">Intelligent Logic Rules</h3>
+                        <p class="text-gray-300">
                             Don't treat every customer the same. Offer a pause to those who are tired, and a discount to those who are broke.
                         </p>
                     </div>
-                    <div class="flex items-center gap-4 text-sm font-mono opacity-80">
-                        <div class="bg-gray-800/50 px-4 py-2 rounded-lg border border-white/10 text-red-300">If: Expensive</div>
+                    <div class="flex items-center gap-4 text-sm font-mono">
+                        <div class="bg-gray-800 px-4 py-2 rounded-lg border border-gray-700 text-red-300">If: Expensive</div>
                         <div class="h-px w-8 bg-gray-600"></div>
-                        <div class="bg-blue-900/30 px-4 py-2 rounded-lg border border-blue-500/30 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]">Offer: Pause</div>
+                        <div class="bg-blue-900/50 px-4 py-2 rounded-lg border border-blue-500/50 text-blue-300">Offer: Pause</div>
                     </div>
                 </div>
             </div>
