@@ -3,121 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RetainAI - The Revenue Defense Platform</title>
+    <title>RetainAI - Intelligent Revenue Defense</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .gradient-text {
-            background: linear-gradient(to right, #2563EB, #9333ea);
-            background-clip: text;
+        
+        /* THE APPLE GRADIENT BACKGROUND */
+        .mesh-bg {
+            background-color: #f3f4f6;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-size: 100% 100%;
+            min-height: 100vh;
+        }
+
+        /* THE GLASS EFFECT */
+        .glass {
+            background: rgba(255, 255, 255, 0.05); /* Very see-through */
+            backdrop-filter: blur(20px);            /* The Frost */
+            -webkit-backdrop-filter: blur(20px);    /* Safari Support */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* TEXT GRADIENT */
+        .text-glow {
+            background: linear-gradient(to right, #60a5fa, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .hero-glow {
-            background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
-        }
     </style>
 </head>
-<body class="bg-white text-slate-900 overflow-x-hidden">
+<body class="mesh-bg text-white overflow-x-hidden selection:bg-blue-500 selection:text-white">
 
-    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <nav class="fixed w-full z-50 glass border-b-0">
         <div class="max-w-6xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">R</div>
-                <span class="font-bold text-lg tracking-tight">RetainAI</span>
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/30">R</div>
+                <span class="font-bold text-lg tracking-tight text-white">RetainAI</span>
             </div>
             <div class="flex items-center gap-6">
-                <a href="/demo" class="text-sm font-medium text-slate-600 hover:text-slate-900 hidden md:block">Live Demo</a>
-                <a href="/dashboard" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition">Log In</a>
+                <a href="/login" class="text-sm font-medium text-gray-300 hover:text-white transition">Log In</a>
+                <a href="/signup" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-100 transition shadow-lg shadow-white/10">
+                    Get Started
+                </a>
             </div>
         </div>
     </nav>
 
-    <header class="pt-32 pb-20 px-6 hero-glow relative">
+    <header class="pt-40 pb-20 px-6 relative">
         <div class="max-w-4xl mx-auto text-center relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold mb-8 border border-blue-100">
-                <span class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span>
-                Now accepting beta partners
+            
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass mb-8 border border-white/10">
+                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></span>
+                <span class="text-sm font-medium text-gray-200">System Online v1.0</span>
             </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight text-slate-900">
-                Don't let them <br>
-                <span class="gradient-text">leave empty handed.</span>
+
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
+                Stop Churn. <br>
+                <span class="text-glow">Automatically.</span>
             </h1>
-            <p class="text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-                RetainAI plugs into your Stripe billing flow to intercept cancellations with dynamic, personalized offers. Save 20% of churn automatically.
+            
+            <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+                The intelligent layer that sits between your customer and the cancel button. Turn lost revenue into retained profit with one line of code.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/demo" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
-                    Try the Demo
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="/demo" class="group relative px-8 py-4 bg-white text-black rounded-full font-bold text-lg hover:scale-105 transition duration-200 shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]">
+                    <span class="relative z-10 flex items-center gap-2">
+                        Watch Demo 
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </span>
                 </a>
-                <a href="mailto:founder@retainai.com" class="bg-white text-slate-700 border border-slate-200 px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-50 transition flex items-center justify-center">
-                    Book Onboarding
+                <a href="/signup" class="text-gray-300 hover:text-white font-medium px-6 py-4 transition">
+                    Create Free Account
                 </a>
             </div>
         </div>
     </header>
 
-    <section class="max-w-6xl mx-auto px-6 pb-24">
+    <section class="max-w-6xl mx-auto px-6 pb-32">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <div class="md:col-span-2 bg-slate-900 rounded-2xl p-8 text-white overflow-hidden relative group">
-                <div class="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition">
-                    <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.75 9.5 9.75 12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Drop-in Integration</h3>
-                <p class="text-slate-400 mb-6 text-sm">Works with React, Vue, WordPress, and standard HTML.</p>
-                <div class="bg-black/50 rounded-lg p-4 font-mono text-sm text-green-400 border border-slate-700">
-                    &lt;script src="https://retainai.com/widget.js"&gt;&lt;/script&gt;<br>
-                    &lt;script&gt;<br>
-                    &nbsp;&nbsp;RetainAI.init({ projectId: 'YOUR_ID' });<br>
-                    &lt;/script&gt;
-                </div>
-            </div>
-
-            <div class="bg-blue-600 rounded-2xl p-8 text-white flex flex-col justify-between relative overflow-hidden">
-                <div class="relative z-10">
-                    <h3 class="text-xl font-bold mb-1">Revenue Saved</h3>
-                    <div class="text-5xl font-extrabold mb-2">$14,203</div>
-                    <div class="text-blue-200 text-sm">Last 30 Days</div>
-                </div>
-                <svg class="absolute bottom-0 left-0 w-full h-24 text-blue-500 opacity-50" fill="currentColor" viewBox="0 0 100 20"><path d="M0 20 L0 15 L20 10 L40 12 L60 5 L80 8 L100 2 L100 20 Z"></path></svg>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-900 mb-2">Smart Logic</h3>
-                <p class="text-slate-500 text-sm">
-                    If they say "Too Expensive", offer a pause. If they say "Bug", offer support. You set the rules.
-                </p>
-            </div>
-
-            <div class="md:col-span-2 bg-gray-50 border border-slate-200 rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-4">
-                     <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+            <div class="md:col-span-2 glass-card rounded-3xl p-8 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-12 bg-blue-600/20 blur-3xl rounded-full w-32 h-32 group-hover:bg-blue-600/30 transition duration-500"></div>
+                
+                <h3 class="text-2xl font-bold mb-2">Drop-in Integration</h3>
+                <p class="text-gray-400 mb-6">Works with every stack. Copy, paste, retain.</p>
+                
+                <div class="bg-black/40 backdrop-blur-md rounded-xl p-5 font-mono text-sm border border-white/10 shadow-inner">
+                    <div class="flex gap-2 mb-3">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
                     </div>
-                     <h3 class="text-xl font-bold text-slate-900">100% Whitelabel</h3>
+                    <p class="text-blue-300">&lt;script <span class="text-purple-300">src</span>="<span class="text-green-300">.../widget.js</span>"&gt;&lt;/script&gt;</p>
+                    <p class="text-gray-500 mt-1">// That's it. You are live.</p>
                 </div>
-                <p class="text-slate-500 text-sm mb-6">
-                    Our widget adapts to your brand colors automatically. It looks like your native product, not a third-party tool.
-                </p>
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-600 ring-2 ring-offset-2 ring-blue-600"></div>
-                    <div class="w-8 h-8 rounded-full bg-red-600"></div>
-                    <div class="w-8 h-8 rounded-full bg-green-600"></div>
-                    <div class="w-8 h-8 rounded-full bg-black"></div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-green-500/20 to-transparent opacity-50 group-hover:opacity-100 transition"></div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-200">Recovered</h3>
+                    <p class="text-5xl font-bold mt-2 text-white tracking-tight">$12,400</p>
+                </div>
+                <div class="mt-4 flex items-center gap-2 text-green-400 text-sm font-medium bg-green-500/10 w-fit px-2 py-1 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    +24% this month
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-8 md:col-span-3">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div class="max-w-md">
+                        <h3 class="text-2xl font-bold mb-3">Intelligent Logic Rules</h3>
+                        <p class="text-gray-400">
+                            Don't treat every customer the same. Offer a pause to those who are tired, and a discount to those who are broke.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm font-mono opacity-80">
+                        <div class="bg-gray-800/50 px-4 py-2 rounded-lg border border-white/10 text-red-300">If: Expensive</div>
+                        <div class="h-px w-8 bg-gray-600"></div>
+                        <div class="bg-blue-900/30 px-4 py-2 rounded-lg border border-blue-500/30 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]">Offer: Pause</div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </section>
 
-    <footer class="border-t border-slate-100 py-12 text-center text-slate-400 text-sm">
-        <p>&copy; 2025 RetainAI. Built for SaaS Founders.</p>
+    <footer class="border-t border-white/10 py-12 text-center text-gray-500 text-sm relative z-10">
+        <p>&copy; 2025 RetainAI. Designed in California.</p>
     </footer>
 
 </body>
