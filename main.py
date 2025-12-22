@@ -1,41 +1,40 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, status
+from fastapi import FastAPI, HTTPException, Request, Depends, status, Response
 from fastapi.staticfiles import StaticFiles 
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBasic, HTTPBasicCredentials # <--- NEW IMPORTS
 from pydantic import BaseModel
 import stripe
 import sqlite3
 import datetime
-import secrets # Used to compare passwords safely
+import secrets 
 
 # --- CONFIGURATION ---
 stripe.api_key = "sk_test_12345" 
 COMMISSION_RATE = 0.20 
 DB_FILE = "churnkey.db"
 
-# --- ADMIN CREDENTIALS (CHANGE THESE!) ---
+# --- ADMIN CREDENTIALS ---
 ADMIN_USER = "admin"
 ADMIN_PASSWORD = "password123"
+# A secret token to store in the browser cookie
+SESSION_TOKEN = "secret_session_token_xyz"
 
 app = FastAPI()
-security = HTTPBasic() # This handles the browser popup
 
-# --- SECURITY LOGIC ---
-def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+# --- SECURITY LOGIC (COOKIE BASED) ---
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+def get_current_user(request: Request):
     """
-    Checks if the user typed the correct username/password.
+    Checks if the user has the correct cookie. 
+    If not, redirects them to the Login page.
     """
-    correct_user = secrets.compare_digest(credentials.username, ADMIN_USER)
-    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
-    
-    if not (correct_user and correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    return credentials.username
+    token = request.cookies.get("session_token")
+    if not token or token != SESSION_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return "admin"
 
 # --- CORS ---
 app.add_middleware(
@@ -88,25 +87,36 @@ class OfferRequest(BaseModel):
     value: int
     code: str
 
-# --- PUBLIC ENDPOINTS (No Login Required) ---
-# These are for the customers/widget. They MUST remain open.
-
 # --- PUBLIC ROUTES ---
 @app.get("/")
 async def read_landing():
-    # Shows the new Marketing Homepage
     return FileResponse('static/index.html')
 
 @app.get("/demo")
 async def read_demo():
-    # Shows the Cancellation Flow (formerly index.html)
     return FileResponse('static/demo.html')
 
-# --- PROTECTED ROUTES (Login Required) ---
-@app.get("/setup", dependencies=[Depends(get_current_username)])
-async def read_setup():
-    return FileResponse('static/setup.html')
+# --- LOGIN ROUTES ---
+@app.get("/login")
+async def login_page():
+    return FileResponse('static/login.html')
 
+@app.post("/api/login")
+async def api_login(response: Response, creds: LoginRequest):
+    if creds.username == ADMIN_USER and creds.password == ADMIN_PASSWORD:
+        # Set a secure cookie
+        response.set_cookie(key="session_token", value=SESSION_TOKEN, httponly=True)
+        return {"status": "success"}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+@app.get("/logout")
+async def logout(response: Response):
+    response = RedirectResponse(url="/login")
+    response.delete_cookie("session_token")
+    return response
+
+# --- PUBLIC API (For Widget) ---
 @app.get("/api/get-offer")
 async def get_offer(project_id: str, reason: str):
     conn = get_db_connection()
@@ -150,19 +160,35 @@ async def stripe_webhook(request: Request):
     return {"status": "success"}
 
 
-# --- PROTECTED ENDPOINTS (Login Required) ---
-# We add `dependencies=[Depends(get_current_username)]` to lock these.
+# --- PROTECTED ROUTES (Login Required) ---
+# Note: If unauthorized, we catch the error and redirect to /login
 
-@app.get("/dashboard", dependencies=[Depends(get_current_username)])
-async def read_dashboard():
-    return FileResponse('static/dashboard.html')
+@app.get("/dashboard")
+async def read_dashboard(request: Request):
+    try:
+        get_current_user(request) # Check Cookie
+        return FileResponse('static/dashboard.html')
+    except HTTPException:
+        return RedirectResponse(url="/login")
 
-@app.get("/settings", dependencies=[Depends(get_current_username)])
-async def read_settings():
-    return FileResponse('static/settings.html')
+@app.get("/settings")
+async def read_settings(request: Request):
+    try:
+        get_current_user(request)
+        return FileResponse('static/settings.html')
+    except HTTPException:
+        return RedirectResponse(url="/login")
 
-@app.get("/dashboard-stats", dependencies=[Depends(get_current_username)])
-async def get_dashboard_stats():
+@app.get("/setup")
+async def read_setup(request: Request):
+    try:
+        get_current_user(request)
+        return FileResponse('static/setup.html')
+    except HTTPException:
+        return RedirectResponse(url="/login")
+
+@app.get("/dashboard-stats")
+async def get_dashboard_stats(user: str = Depends(get_current_user)):
     conn = get_db_connection()
     saves = conn.execute("SELECT * FROM saves").fetchall()
     conn.close()
@@ -192,13 +218,8 @@ async def get_dashboard_stats():
         "recent_activity": recent_activity[:5]
     }
 
-@app.post("/run-monthly-billing", dependencies=[Depends(get_current_username)])
-async def run_monthly_billing():
-    # Only the Admin can generate an invoice
-    return {"invoice_total": 100} # Placeholder
-
-@app.post("/api/create-offer", dependencies=[Depends(get_current_username)])
-async def create_offer(offer: OfferRequest):
+@app.post("/api/create-offer")
+async def create_offer(offer: OfferRequest, user: str = Depends(get_current_user)):
     conn = get_db_connection()
     existing = conn.execute("SELECT id FROM offers WHERE project_id = ? AND trigger_rule = ?", (offer.project_id, offer.trigger)).fetchone()
 
