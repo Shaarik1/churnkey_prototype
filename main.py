@@ -12,38 +12,9 @@ import secrets
 stripe.api_key = "sk_test_12345" 
 COMMISSION_RATE = 0.20 
 DB_FILE = "churnkey.db"
-
-# --- ADMIN CREDENTIALS ---
-ADMIN_USER = "admin"
-ADMIN_PASSWORD = "password123"
-# A secret token to store in the browser cookie
 SESSION_TOKEN = "secret_session_token_xyz"
 
 app = FastAPI()
-
-# --- SECURITY LOGIC (COOKIE BASED) ---
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-def get_current_user(request: Request):
-    """
-    Checks if the user has the correct cookie. 
-    If not, redirects them to the Login page.
-    """
-    token = request.cookies.get("session_token")
-    if not token or token != SESSION_TOKEN:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    return "admin"
-
-# --- CORS ---
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # --- DATABASE ENGINE ---
 def get_db_connection():
@@ -53,6 +24,7 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
+    # 1. Saves Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS saves (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +35,7 @@ def init_db():
             date TEXT
         )
     ''')
+    # 2. Offers Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS offers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,10 +47,47 @@ def init_db():
             is_active INTEGER DEFAULT 1
         )
     ''')
+    # 3. Users Table (NEW!)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            username TEXT PRIMARY KEY,
+            password TEXT NOT NULL
+        )
+    ''')
+    
+    # Create default admin if not exists
+    try:
+        conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", ("admin", "password123"))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        pass # Admin already exists
+
     conn.commit()
     conn.close()
 
 init_db()
+
+# --- SECURITY LOGIC ---
+class AuthRequest(BaseModel):
+    username: str
+    password: str
+
+def get_current_user(request: Request):
+    token = request.cookies.get("session_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    # In a real app, we would validate the token against a session DB
+    # For this demo, we trust the static token
+    return "admin" 
+
+# --- CORS ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- DATA MODELS ---
 class OfferRequest(BaseModel):
@@ -87,7 +97,7 @@ class OfferRequest(BaseModel):
     value: int
     code: str
 
-# --- PUBLIC ROUTES ---
+# --- PAGE ROUTES ---
 @app.get("/")
 async def read_landing():
     return FileResponse('static/index.html')
@@ -96,15 +106,38 @@ async def read_landing():
 async def read_demo():
     return FileResponse('static/demo.html')
 
-# --- LOGIN ROUTES ---
 @app.get("/login")
 async def login_page():
     return FileResponse('static/login.html')
 
+@app.get("/signup")
+async def signup_page():
+    return FileResponse('static/signup.html')
+
+# --- AUTH API ---
+
+@app.post("/api/signup")
+async def api_signup(creds: AuthRequest):
+    conn = get_db_connection()
+    try:
+        # Try to insert new user
+        conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", (creds.username, creds.password))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    conn.close()
+    return {"status": "success"}
+
 @app.post("/api/login")
-async def api_login(response: Response, creds: LoginRequest):
-    if creds.username == ADMIN_USER and creds.password == ADMIN_PASSWORD:
-        # Set a secure cookie
+async def api_login(response: Response, creds: AuthRequest):
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE username = ? AND password = ?", (creds.username, creds.password)).fetchone()
+    conn.close()
+
+    if user:
+        # Set cookie
         response.set_cookie(key="session_token", value=SESSION_TOKEN, httponly=True)
         return {"status": "success"}
     else:
@@ -116,57 +149,12 @@ async def logout(response: Response):
     response.delete_cookie("session_token")
     return response
 
-# --- PUBLIC API (For Widget) ---
-@app.get("/api/get-offer")
-async def get_offer(project_id: str, reason: str):
-    conn = get_db_connection()
-    offer = conn.execute(
-        "SELECT * FROM offers WHERE project_id = ? AND trigger_rule = ? AND is_active = 1",
-        (project_id, reason)
-    ).fetchone()
-    
-    if not offer:
-        offer = conn.execute(
-            "SELECT * FROM offers WHERE project_id = ? AND trigger_rule = 'default' AND is_active = 1",
-            (project_id,)
-        ).fetchone()
-    conn.close()
-    
-    if offer: return dict(offer)
-    else: return {"offer_type": "pause", "offer_value": 1}
 
-@app.post("/accept-offer")
-async def accept_offer(customer_id: str, offer_type: str):
-    plan_amount = 100.00 
-    saved_value = plan_amount * 0.50 
-    conn = get_db_connection()
-    conn.execute(
-        "INSERT INTO saves (customer_id, offer_type, saved_amount, status, date) VALUES (?, ?, ?, ?, ?)",
-        (customer_id, offer_type, saved_value, 'pending', datetime.datetime.now().isoformat())
-    )
-    conn.commit()
-    conn.close()
-    return {"status": "success", "message": "Discount applied!"}
-
-@app.post("/webhook")
-async def stripe_webhook(request: Request):
-    payload = await request.json()
-    if payload.get('type') == 'invoice.payment_succeeded':
-        customer_id = payload['data']['object']['customer']
-        conn = get_db_connection()
-        conn.execute("UPDATE saves SET status = 'verified' WHERE customer_id = ? AND status = 'pending'", (customer_id,))
-        conn.commit()
-        conn.close()
-    return {"status": "success"}
-
-
-# --- PROTECTED ROUTES (Login Required) ---
-# Note: If unauthorized, we catch the error and redirect to /login
-
+# --- PROTECTED PAGES ---
 @app.get("/dashboard")
 async def read_dashboard(request: Request):
     try:
-        get_current_user(request) # Check Cookie
+        get_current_user(request)
         return FileResponse('static/dashboard.html')
     except HTTPException:
         return RedirectResponse(url="/login")
@@ -187,6 +175,7 @@ async def read_setup(request: Request):
     except HTTPException:
         return RedirectResponse(url="/login")
 
+# --- APP LOGIC ---
 @app.get("/dashboard-stats")
 async def get_dashboard_stats(user: str = Depends(get_current_user)):
     conn = get_db_connection()
@@ -232,5 +221,46 @@ async def create_offer(offer: OfferRequest, user: str = Depends(get_current_user
     conn.close()
     return {"status": "success", "message": "Custom offer saved!"}
 
-# --- STATIC FILES ---
+@app.get("/api/get-offer")
+async def get_offer(project_id: str, reason: str):
+    conn = get_db_connection()
+    offer = conn.execute(
+        "SELECT * FROM offers WHERE project_id = ? AND trigger_rule = ? AND is_active = 1",
+        (project_id, reason)
+    ).fetchone()
+    
+    if not offer:
+        offer = conn.execute(
+            "SELECT * FROM offers WHERE project_id = ? AND trigger_rule = 'default' AND is_active = 1",
+            (project_id,)
+        ).fetchone()
+    conn.close()
+    
+    if offer: return dict(offer)
+    else: return {"offer_type": "pause", "offer_value": 1}
+
+@app.post("/accept-offer")
+async def accept_offer(customer_id: str, offer_type: str):
+    plan_amount = 100.00 
+    saved_value = plan_amount * 0.50 
+    conn = get_db_connection()
+    conn.execute(
+        "INSERT INTO saves (customer_id, offer_type, saved_amount, status, date) VALUES (?, ?, ?, ?, ?)",
+        (customer_id, offer_type, saved_value, 'pending', datetime.datetime.now().isoformat())
+    )
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": "Discount applied!"}
+
+@app.post("/webhook")
+async def stripe_webhook(request: Request):
+    payload = await request.json()
+    if payload.get('type') == 'invoice.payment_succeeded':
+        customer_id = payload['data']['object']['customer']
+        conn = get_db_connection()
+        conn.execute("UPDATE saves SET status = 'verified' WHERE customer_id = ? AND status = 'pending'", (customer_id,))
+        conn.commit()
+        conn.close()
+    return {"status": "success"}
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
